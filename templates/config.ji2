@@ -1,0 +1,11 @@
+{% for global in item['globals'] | default([]) %}
+{{ global }}
+{% endfor %}
+{% for log in item['logs'] | default([]) %}
+"{{ log['paths'] | join('" "') }}"
+{
+{% for option in log['options'] %}
+  {{ option }}
+{% endfor %}
+}
+{% endfor %}
