@@ -1,0 +1,13 @@
+---
+- name: "Update logrotate configuration"
+  ansible.builtin.template:
+    src: "config.ji2"
+    dest: "/etc/{{ (item['file'] == 'logrotate') | ternary(item['file'],'logrotate.d/'+item['file']) }}"
+    owner: "{{ logrotate_config['owner'] | default(omit) }}"
+    group: "{{ logrotate_config['group'] | default(omit) }}"
+    mode: "{{ logrotate_config['mode'] | default(omit) }}"
+    setype: "{{ logrotate_config['setype'] | default(omit) }}"
+  loop: "{{ logrotate_logs }}"
+  loop_control:
+    label: "/etc/{{ (item['file'] == 'logrotate') | ternary(item['file'],'logrotate.d/'+item['file']) }}"
+  notify: "Restart logrotate service"

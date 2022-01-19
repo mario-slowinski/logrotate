@@ -1,0 +1,6 @@
+---
+- name: "Update logrotate config"
+  tags:
+    - logrotate
+    - logrotate.config
+  ansible.builtin.import_tasks: config.yaml

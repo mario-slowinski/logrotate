@@ -1,0 +1,40 @@
+{% if vmware_guest is defined %}
+  {%- set macaddresses = vmware_guest.instance | json_query('*.macaddress') %}
+{% endif %}
+# netplan created by ansible
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+{%- for network in netplan_networks %}
+{%- if network['ip'] is defined or macaddresses[loop.index0] is defined %}{{ "" }}
+    id{{ loop.index0 }}:
+  {%- if macaddresses[loop.index0] is defined %}{{ "" }}
+      match:
+        macaddress: {{ macaddresses[loop.index0] }}
+  {%- endif %}
+  {%- if network['ip'] is defined %}{{ "" }}
+      dhcp4: no
+      addresses:
+        - {{ (network['ip']+'/'+network['netmask']) | ipaddr('address/prefix') }}
+    {%- if network['gateway'] is defined and network['gateway'] != '' %}{{ "" }}
+      gateway4: {{ network['gateway'] }}
+    {%- endif %}
+    {%- if network['routes'] is defined and network['routes'] | length > 0 %}{{ "" }}
+      routes: {{ network['routes'] }}
+    {%- endif %}
+    {%- if network['dns_servers'] is defined and network['dns_servers'] | length > 0 %}
+      {%- set dns_servers = network['dns_servers'] %}
+      {%- set dns_search = [network['domain']] %}
+    {%- elif network['dns_servers'] is not defined and netplan_dns_servers is defined %}
+      {%- set dns_servers = netplan_dns_servers %}
+      {%- set dns_search = netplan_dns_search %}
+    {%- endif %}
+    {%- if dns_servers is defined %}{{ "" }}
+      nameservers: 
+        addresses: {{ dns_servers }}
+        search: {{ dns_search }}
+    {%- endif %}
+  {%- endif %}
+{%- endif %}
+{%- endfor %}
