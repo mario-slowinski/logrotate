@@ -2,7 +2,7 @@
 logrotate_config:
   owner: root
   group: root
-  mode: 0o644
+  mode: '0o644'
   setype: etc_t
 
 logrotate_service: logrotate
